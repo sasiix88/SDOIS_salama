@@ -1,8 +1,51 @@
-.vscode/
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
+# ===== Build output =====
+build/
+cmake-build-*/
+out/
+bin/
+Debug/
+Release/
+x64/
+x86/
+[Cc]MakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CMakeUserPresets.json
+compile_commands.json
 
+# ===== Compiled binaries and object files =====
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.app
+*.out
+rectangle_app
+
+# ===== Coverage artifacts (>90% coverage requirement) =====
+*.gcda
+*.gcno
+*.gcov
+coverage/
+*.lcov
+*.xml.bak
+
+# ===== IDE / editor files =====
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+.vs/
+*.swp
+*~
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db
+desktop.ini
