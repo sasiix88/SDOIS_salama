@@ -12,6 +12,7 @@ CMakeFiles/
 cmake_install.cmake
 CMakeUserPresets.json
 compile_commands.json
+cmake-build-*/
 
 # ===== Compiled binaries and object files =====
 *.o
@@ -49,3 +50,5 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+__pycache__/
