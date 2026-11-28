@@ -43,12 +43,19 @@ jobs:
 
       - name: Static analysis (cppcheck)
         run: |
+          set +e
           cppcheck \
             --enable=warning,performance,portability \
             --error-exitcode=1 \
             --suppress=missingIncludeSystem \
             --std=c++17 \
-            lab1/rectangle/src lab1/set/src
+            --template="{file}:{line}: {severity}: {id}: {message}" \
+            lab1/rectangle/src lab1/set/src 2>&1 | tee cppcheck_output.txt
+          analysis_status=${PIPESTATUS[0]}
+          grep -E ': (error|warning|performance|portability):' cppcheck_output.txt | while read -r finding; do
+            echo "::error::${finding}"
+          done
+          exit $analysis_status
 
       - name: Upload test report
         if: always()
