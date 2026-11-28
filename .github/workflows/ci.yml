@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feature**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lab1:
+    name: Lab 1 - Build, Tests, Coverage, Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install analysis and coverage tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcovr cppcheck doxygen
+
+      - name: Configure Lab 1
+        run: |
+          cmake -S lab1 -B lab1/build \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DENABLE_COVERAGE=ON
+
+      - name: Build Lab 1
+        run: cmake --build lab1/build -j
+
+      - name: Run tests
+        run: ctest --test-dir lab1/build --output-on-failure
+
+      - name: Check coverage (must be over 90%)
+        run: cmake --build lab1/build --target coverage
+
+      - name: Generate HTML test report
+        run: cmake --build lab1/build --target test_report
+
+      - name: Generate Doxygen documentation
+        run: cmake --build lab1/build --target docs
+
+      - name: Static analysis (cppcheck)
+        run: |
+          set +e
+          cppcheck \
+            --enable=warning,performance,portability \
+            --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            --std=c++17 \
+            --template="{file}:{line}: {severity}: {id}: {message}" \
+            lab1/rectangle/src lab1/set/src 2>&1 | tee cppcheck_output.txt
+          analysis_status=${PIPESTATUS[0]}
+          grep -E ': (error|warning|performance|portability):' cppcheck_output.txt | while read -r finding; do
+            echo "::error::${finding}"
+          done
+          exit $analysis_status
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab1-test-report
+          path: lab1/build/test_report.html
+          if-no-files-found: warn
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab1-coverage
+          path: lab1/build/coverage/
+          if-no-files-found: warn
+
+      - name: Upload documentation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab1-doxygen-docs
+          path: lab1/build/docs/
+
+          if-no-files-found: warn

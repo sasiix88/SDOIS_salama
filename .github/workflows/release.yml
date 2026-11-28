@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: Build and publish Linux release artifact
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake zip doxygen
+
+      - name: Configure Lab 1 (Release build)
+        run: |
+          cmake -S lab1 -B release-build \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Lab 1 applications
+        run: cmake --build release-build -j
+
+      - name: Generate Doxygen documentation
+        run: cmake --build release-build --target docs
+
+      - name: Package release artifact
+        run: |
+          mkdir -p dist/lab1/bin
+          cp release-build/rectangle/RectangleApp dist/lab1/bin/
+          cp release-build/set/SetApp dist/lab1/bin/
+          cp -r release-build/docs/html dist/lab1/docs
+          cp -r lab1/rectangle/src dist/lab1/rectangle_src
+          cp -r lab1/set/src dist/lab1/set_src
+          cp -r lab1/rectangle/tests dist/lab1/rectangle_tests
+          cp -r lab1/set/tests dist/lab1/set_tests
+          cp lab1/CMakeLists.txt dist/lab1/
+          cp README.md dist/
+          cd dist && zip -r ../lab1_linux.zip .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: lab1-${{ github.run_number }}
+          name: Lab 1 - Linux build ${{ github.run_number }}
+          body: |
+            Automated release build of Lab 1 (variants 1.3 Rectangle and 1.4.1 Set).
+
+            Contents:
+            - bin/RectangleApp, bin/SetApp - Linux console executables
+            - Full Doxygen HTML documentation (docs/)
+            - Source code and unit tests
+            - Build instructions in the repository README
+          files: lab1_linux.zip

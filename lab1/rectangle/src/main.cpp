@@ -49,8 +49,16 @@ int main() {
             std::cout << "a = " << a << "\n";
             break;
         }
-        case 5: std::cout << "a++ = " << a++ << ", now a = " << a << "\n"; break;
-        case 6: std::cout << "a-- = " << a-- << ", now a = " << a << "\n"; break;
+        case 5: {
+            Rectangle before = a++;
+            std::cout << "a++ = " << before << ", now a = " << a << "\n";
+            break;
+        }
+        case 6: {
+            Rectangle before = a--;
+            std::cout << "a-- = " << before << ", now a = " << a << "\n";
+            break;
+        }
         case 7: {
             Rectangle b = readRectangle("Second rectangle");
             std::cout << "a + b = " << (a + b) << "\n";
